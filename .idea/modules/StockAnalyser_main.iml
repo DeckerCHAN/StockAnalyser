@@ -12,11 +12,14 @@
     <orderEntry type="module-library">
       <library>
         <CLASSES>
-          <root url="jar://C:/Program Files/Java/jdk1.8.0_101/jre/lib/rt.jar!/" />
+          <root url="jar:///usr/lib/jvm/java-8-oracle/jre/lib/rt.jar!/" />
         </CLASSES>
         <JAVADOC />
         <SOURCES />
       </library>
     </orderEntry>
+    <orderEntry type="library" name="Gradle: com.j256.ormlite:ormlite-jdbc:5.0" level="project" />
+    <orderEntry type="library" name="Gradle: com.j256.ormlite:ormlite-core:5.0" level="project" />
+    <orderEntry type="library" name="Gradle: org.xerial:sqlite-jdbc:3.21.0.1" level="project" />
   </component>
 </module>
