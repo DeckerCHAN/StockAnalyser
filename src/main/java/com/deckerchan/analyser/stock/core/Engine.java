@@ -1,11 +1,13 @@
 package com.deckerchan.analyser.stock.core;
 
+import com.deckerchan.analyser.stock.core.entities.DailyAverage;
 import com.deckerchan.analyser.stock.core.entities.Record;
 import com.j256.ormlite.dao.Dao;
 import com.j256.ormlite.dao.DaoManager;
 import com.j256.ormlite.jdbc.JdbcConnectionSource;
 import com.j256.ormlite.support.ConnectionSource;
 import com.j256.ormlite.table.TableUtils;
+import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
 import java.io.File;
 import java.nio.file.Files;
@@ -76,6 +78,10 @@ public class Engine {
 
     public List<Record> getRecordsByCompany(String symbol) throws Exception {
         return this.recordUUIDDao.queryForEq("symbol", symbol);
+    }
+
+    public List<DailyAverage> getDailyAverage()throws Exception{
+        throw new NotImplementedException();
     }
 
 
