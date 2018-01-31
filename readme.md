@@ -1,4 +1,4 @@
-# Stock Price Analyser
+# Stock Price Analyser ![build state](https://travis-ci.org/DeckerCHAN/StockAnalyser.svg?branch=master)
 
 A stock analyser based on javaFX. 
 
