@@ -1,40 +1,42 @@
 package com.deckerchan.analyser.stock.core;
 
+import com.deckerchan.analyser.stock.StaticConfig;
 import com.deckerchan.analyser.stock.core.entities.DailyAverage;
 import com.deckerchan.analyser.stock.core.entities.Record;
+import com.deckerchan.analyser.stock.core.loaders.CSVLoader;
+import com.deckerchan.analyser.stock.utils.ConsumerWappers;
 import com.j256.ormlite.dao.Dao;
 import com.j256.ormlite.dao.DaoManager;
 import com.j256.ormlite.jdbc.JdbcConnectionSource;
-import com.j256.ormlite.stmt.QueryBuilder;
-import com.j256.ormlite.stmt.Where;
+import com.j256.ormlite.logger.LocalLog;
+import com.j256.ormlite.stmt.DeleteBuilder;
 import com.j256.ormlite.support.ConnectionSource;
 import com.j256.ormlite.table.TableUtils;
-import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
 import java.io.File;
-import java.nio.file.Files;
-import java.nio.file.Paths;
-import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
-
-import static java.lang.System.out;
 
 public class Engine {
     private static Engine instance;
     private final Dao<Record, UUID> recordUUIDDao;
+    private final Dao<DailyAverage, Date> averageDateDao;
 
     private Engine() throws Exception {
-        String databaseUrl = "jdbc:sqlite:data.db";
+
+        System.setProperty(LocalLog.LOCAL_LOG_LEVEL_PROPERTY, "ERROR");
+
+        String databaseUrl = StaticConfig.JDBC_CONNECT_STRING;
         ConnectionSource connectionSource =
                 new JdbcConnectionSource(databaseUrl);
 
         this.recordUUIDDao =
                 DaoManager.createDao(connectionSource, Record.class);
         TableUtils.createTableIfNotExists(connectionSource, Record.class);
+
+        this.averageDateDao = DaoManager.createDao(connectionSource, DailyAverage.class);
+        TableUtils.createTableIfNotExists(connectionSource, DailyAverage.class);
+
 
     }
 
@@ -46,33 +48,70 @@ public class Engine {
     }
 
     public void loadFromFile(File file) throws Exception {
-        try (Stream<String> stream = Files.lines(Paths.get(file.getAbsolutePath()))) {
-            stream.skip(1).forEach(x -> {
+        Collection<Record> data = new CSVLoader(file).load();
+        data.forEach(ConsumerWappers.throwingConsumerWrapper(this.recordUUIDDao::create));
+        data.stream().map(Record::getDate).distinct().forEach(ConsumerWappers.throwingConsumerWrapper(x -> {
 
-                try {
-                    String[] fields = x.split(",");
 
-                    Record record = new Record();
+            //Delete old one
+            DeleteBuilder<DailyAverage, Date> db = this.averageDateDao.deleteBuilder();
+            db.where().eq("date", x);
+            db.delete();
 
-                    record.setId(UUID.randomUUID());
+            //New average object
+            DailyAverage average = new DailyAverage();
+            average.setDate(x);
 
-                    record.setSymbol(fields[0]);
+            //Set Open price
+            OptionalDouble averageOpen = this.recordUUIDDao.queryBuilder().where().eq("date", x).query().stream().mapToDouble(Record::getOpen).average();
+            if (averageOpen.isPresent()) {
+                average.setOpen(averageOpen.getAsDouble());
+            } else {
+                average.setOpen(0D);
+            }
 
-                    record.setDate(new SimpleDateFormat("yyyy-MM-dd").parse(fields[1]));
-                    record.setOpen(Double.valueOf(fields[2]));
-                    record.setHigh(Double.valueOf(fields[3]));
-                    record.setLow(Double.valueOf(fields[4]));
-                    record.setClose(Double.valueOf(fields[5]));
-                    record.setVolume(Integer.valueOf(fields[6]));
-                    record.setAdjClose(Double.valueOf(fields[7]));
+            //Set close price
+            OptionalDouble averageClose = this.recordUUIDDao.queryBuilder().where().eq("date", x).query().stream().mapToDouble(Record::getClose).average();
+            if (averageClose.isPresent()) {
+                average.setClose(averageClose.getAsDouble());
+            } else {
+                average.setClose(0D);
+            }
 
-                    this.recordUUIDDao.create(record);
-                } catch (Exception ex) {
-                    out.println(String.format("Unable to add this data. Due to %s", ex.getMessage()));
-                }
+            //Set high price
+            OptionalDouble averageHigh = this.recordUUIDDao.queryBuilder().where().eq("date", x).query().stream().mapToDouble(Record::getHigh).average();
+            if (averageHigh.isPresent()) {
+                average.setHigh(averageHigh.getAsDouble());
+            } else {
+                average.setHigh(0D);
+            }
 
-            });
-        }
+            //Set low price
+            OptionalDouble averageLow = this.recordUUIDDao.queryBuilder().where().eq("date", x).query().stream().mapToDouble(Record::getLow).average();
+            if (averageLow.isPresent()) {
+                average.setLow(averageLow.getAsDouble());
+            } else {
+                average.setLow(0D);
+            }
+
+            //Set low price
+            OptionalDouble averageAdj = this.recordUUIDDao.queryBuilder().where().eq("date", x).query().stream().mapToDouble(Record::getAdjClose).average();
+            if (averageAdj.isPresent()) {
+                average.setAdjClose(averageAdj.getAsDouble());
+            } else {
+                average.setAdjClose(0D);
+            }
+
+            //Set volume
+            OptionalDouble averageVolume = this.recordUUIDDao.queryBuilder().where().eq("date", x).query().stream().mapToInt(Record::getVolume).average();
+            if (averageVolume.isPresent()) {
+                average.setVolume(averageVolume.getAsDouble());
+            } else {
+                average.setVolume(0D);
+            }
+
+            this.averageDateDao.create(average);
+        }));
     }
 
     public List<String> getAllStockSymbol() throws Exception {
@@ -83,8 +122,12 @@ public class Engine {
         return this.recordUUIDDao.queryForEq("symbol", symbol);
     }
 
-    public List<DailyAverage> getDailyAverage() throws Exception {
-        throw new NotImplementedException();
+    public List<DailyAverage> getOverallDailyAverage() throws Exception {
+        return this.averageDateDao.queryForAll();
+    }
+
+    public DailyAverage getAverageForSpecificDay(Date date) throws Exception {
+        return this.averageDateDao.queryForId(date);
     }
 
     public Record getRecordBySymbolAndDate(String symbol, Date date) throws Exception {

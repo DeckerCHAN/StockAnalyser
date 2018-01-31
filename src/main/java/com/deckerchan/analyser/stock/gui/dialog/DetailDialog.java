@@ -1,6 +1,7 @@
-package com.deckerchan.analyser.stock.gui;
+package com.deckerchan.analyser.stock.gui.dialog;
 
 import com.deckerchan.analyser.stock.core.entities.Record;
+import com.deckerchan.analyser.stock.gui.DateStringConverter;
 import javafx.scene.control.ButtonBar;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.Dialog;
@@ -15,7 +16,7 @@ public class DetailDialog extends Dialog {
         Label lowPrice = new Label(String.format("Low Price: %.2f", record.getLow()));
         Label highPrice = new Label(String.format("High Price: %.2f", record.getHigh()));
         Label adjPrice = new Label(String.format("Adjust close Price: %.2f", record.getAdjClose()));
-        Label volum = new Label(String.format("Volum: %d", record.getVolume()));
+        Label volume = new Label(String.format("Volume: %d", record.getVolume()));
 
         GridPane grid = new GridPane();
         grid.setHgap(10);
@@ -26,7 +27,7 @@ public class DetailDialog extends Dialog {
         grid.add(closePrice, 1, 2);
         grid.add(highPrice, 2, 2);
         grid.add(adjPrice, 3, 1);
-        grid.add(volum, 3, 2);
+        grid.add(volume, 3, 2);
 
         this.getDialogPane().setContent(grid);
         this.getDialogPane().getButtonTypes().add(new ButtonType("Got it!", ButtonBar.ButtonData.CANCEL_CLOSE));

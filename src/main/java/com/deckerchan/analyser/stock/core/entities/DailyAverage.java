@@ -13,7 +13,7 @@ public class DailyAverage {
 
 
     @DatabaseField
-    private String open;
+    private double open;
 
     @DatabaseField
     private double close;
@@ -28,6 +28,62 @@ public class DailyAverage {
     private double adjClose;
 
     @DatabaseField
-    private int volume;
+    private double volume;
 
+    public double getVolume() {
+        return volume;
+    }
+
+    public void setVolume(double volume) {
+        this.volume = volume;
+    }
+
+    public double getOpen() {
+        return open;
+    }
+
+    public void setOpen(double open) {
+        this.open = open;
+    }
+
+    public double getClose() {
+        return close;
+    }
+
+    public void setClose(double close) {
+        this.close = close;
+    }
+
+    public double getHigh() {
+        return high;
+    }
+
+    public void setHigh(double high) {
+        this.high = high;
+    }
+
+    public double getLow() {
+        return low;
+    }
+
+    public void setLow(double low) {
+        this.low = low;
+    }
+
+    public double getAdjClose() {
+        return adjClose;
+    }
+
+    public void setAdjClose(double adjClose) {
+        this.adjClose = adjClose;
+    }
+
+
+    public Date getDate() {
+        return date;
+    }
+
+    public void setDate(Date date) {
+        this.date = date;
+    }
 }
