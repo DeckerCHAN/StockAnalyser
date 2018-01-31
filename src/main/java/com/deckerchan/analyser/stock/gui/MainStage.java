@@ -115,6 +115,9 @@ public class MainStage extends Stage {
         //Set stage resizeable
         this.setResizable(true);
 
+        this.setMinWidth(750);
+        this.setMinHeight(480);
+
         this.setTitle("Stock Analysis");
         this.setScene(new Scene(this.root));
 
@@ -206,6 +209,9 @@ public class MainStage extends Stage {
                 d.getNode().setOnMouseClicked(event -> {
                     //TODO:Use warpper to get rid of try catch
                     try {
+                        out.println(this.getWidth());
+                        out.println(this.getHeight());
+
                         Record record = this.engine.getRecordBySymbolAndDate(this.listView.getSelectionModel().getSelectedItem(), new Date(d.getXValue().longValue()));
                         new DetailDialog(record).showAndWait();
                     } catch (Exception e) {
