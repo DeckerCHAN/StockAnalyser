@@ -1,12 +1,8 @@
-package com.deckerchan.analyser.stock.gui;
+package com.deckerchan.analyser.stock.gui.utils;
 
 import javafx.util.StringConverter;
 
 import java.text.SimpleDateFormat;
-import java.time.Instant;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
-import java.time.format.DateTimeFormatter;
 import java.util.Date;
 
 public class DateStringConverter extends StringConverter<Number> {

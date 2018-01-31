@@ -6,6 +6,8 @@ import com.deckerchan.analyser.stock.core.entities.DailyAverage;
 import com.deckerchan.analyser.stock.core.entities.Record;
 import com.deckerchan.analyser.stock.gui.dialog.AverageDialog;
 import com.deckerchan.analyser.stock.gui.dialog.DetailDialog;
+import com.deckerchan.analyser.stock.gui.dialog.PriceDialog;
+import com.deckerchan.analyser.stock.gui.utils.DateStringConverter;
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -289,7 +291,7 @@ public class MainStage extends Stage {
                             d.getNode().setOnMouseClicked(event -> {
                                 try {
                                     Record record = this.engine.getRecordBySymbolAndDate(this.listView.getSelectionModel().getSelectedItem(), new Date(d.getXValue().longValue()));
-                                    new DetailDialog(record).showAndWait();
+                                    new PriceDialog(record).showAndWait();
                                 } catch (Exception e) {
                                     e.printStackTrace();
                                 }
