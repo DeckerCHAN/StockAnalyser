@@ -5,6 +5,8 @@ import com.deckerchan.analyser.stock.core.entities.Record;
 import com.j256.ormlite.dao.Dao;
 import com.j256.ormlite.dao.DaoManager;
 import com.j256.ormlite.jdbc.JdbcConnectionSource;
+import com.j256.ormlite.stmt.QueryBuilder;
+import com.j256.ormlite.stmt.Where;
 import com.j256.ormlite.support.ConnectionSource;
 import com.j256.ormlite.table.TableUtils;
 import sun.reflect.generics.reflectiveObjects.NotImplementedException;
@@ -13,6 +15,7 @@ import java.io.File;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -73,15 +76,20 @@ public class Engine {
     }
 
     public List<String> getAllStockSymbol() throws Exception {
-        return this.recordUUIDDao.queryForAll().stream().map(x -> x.getSymbol()).distinct().collect(Collectors.toList());
+        return this.recordUUIDDao.queryBuilder().selectColumns("symbol").distinct().query().stream().map(Record::getSymbol).collect(Collectors.toList());
     }
 
     public List<Record> getRecordsByCompany(String symbol) throws Exception {
         return this.recordUUIDDao.queryForEq("symbol", symbol);
     }
 
-    public List<DailyAverage> getDailyAverage()throws Exception{
+    public List<DailyAverage> getDailyAverage() throws Exception {
         throw new NotImplementedException();
+    }
+
+    public Record getRecordBySymbolAndDate(String symbol, Date date) throws Exception {
+        return this.recordUUIDDao.queryBuilder().where().eq("symbol", symbol).and().eq("date", date).queryForFirst();
+
     }
 
 

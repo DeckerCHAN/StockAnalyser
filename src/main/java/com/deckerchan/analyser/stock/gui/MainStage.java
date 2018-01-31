@@ -22,6 +22,7 @@ import javafx.stage.Stage;
 
 import java.io.File;
 import java.util.Comparator;
+import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -185,8 +186,8 @@ public class MainStage extends Stage {
     private void addTooltip() {
         for (XYChart.Series<Number, Number> s : lineChart.getData()) {
             for (XYChart.Data<Number, Number> d : s.getData()) {
-
-                //1. Add tooltip
+                //TODO:Add line transparency to avoid full overlap
+                //Add tooltip
                 Tooltip.install(d.getNode(), new Tooltip(String.format("%s \n%s: %s", DateStringConverter.DEFAULT.toString(d.getXValue()), s.getName(), d.getYValue())));
 
                 //Adding class on hover
@@ -200,6 +201,16 @@ public class MainStage extends Stage {
                 d.getNode().setOnMouseExited(event -> {
                     d.getNode().setScaleX(1);
                     d.getNode().setScaleY(1);
+                });
+                //When clicked
+                d.getNode().setOnMouseClicked(event -> {
+                    //TODO:Use warpper to get rid of try catch
+                    try {
+                        Record record = this.engine.getRecordBySymbolAndDate(this.listView.getSelectionModel().getSelectedItem(), new Date(d.getXValue().longValue()));
+                        new DetailDialog(record).showAndWait();
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
                 });
             }
         }
@@ -223,7 +234,7 @@ public class MainStage extends Stage {
                         .collect(Collectors.toList());
 
                 XYChart.Series openSeries = new XYChart.Series<Number, Number>();
-                openSeries.setName("Open Price");
+                openSeries.setName("open");
                 openSeries.getData().addAll(openList);
 
                 List<XYChart.Data<Long, Double>> closeList = sorted.stream()
@@ -231,7 +242,7 @@ public class MainStage extends Stage {
                         .collect(Collectors.toList());
 
                 XYChart.Series closeSeries = new XYChart.Series<Number, Number>();
-                closeSeries.setName("Close Price");
+                closeSeries.setName("close");
                 closeSeries.getData().addAll(closeList);
 
                 List<XYChart.Data<Long, Double>> lowList = sorted.stream()
@@ -239,7 +250,7 @@ public class MainStage extends Stage {
                         .collect(Collectors.toList());
 
                 XYChart.Series lowSeries = new XYChart.Series<Number, Number>();
-                lowSeries.setName("Close Price");
+                lowSeries.setName("low");
                 lowSeries.getData().addAll(lowList);
 
 
@@ -248,7 +259,7 @@ public class MainStage extends Stage {
                         .collect(Collectors.toList());
 
                 XYChart.Series highSeries = new XYChart.Series<Number, Number>();
-                highSeries.setName("High Price");
+                highSeries.setName("high");
                 highSeries.getData().addAll(highList);
 
                 List<XYChart.Data<Long, Double>> adjList = sorted.stream()
@@ -256,7 +267,7 @@ public class MainStage extends Stage {
                         .collect(Collectors.toList());
 
                 XYChart.Series adjSeries = new XYChart.Series<Number, Number>();
-                adjSeries.setName("Adj Price");
+                adjSeries.setName("close_adj");
                 adjSeries.getData().addAll(adjList);
 
                 Platform.runLater(() -> {
